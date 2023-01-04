@@ -2,7 +2,7 @@
   "name": "analise_tramitassao_sei",
   "version": "1.0.0",
   "scripts": {
-    "report": "node --experimental-modules src/report.js"
+    "report": "node --experimental-modules src/app.js"
   },
   "type": "module",
   "author": "Leonardo Dias",
@@ -11,6 +11,7 @@
     "csv-parser": "^3.0.0",
     "dotenv": "^16.0.3",
     "fs": "^0.0.1-security",
+    "moment": "^2.29.4",
     "read-excel-file": "^5.5.3"
   },
   "engines": {
