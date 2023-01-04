@@ -1,29 +1,56 @@
 
-const getStatusAlvaras = () => {
-    const row = process.env.STATUS_ALVARAS
-    return row.split(",").map((s) => s.trim().toUpperCase())
+const isStatusPresent = (itemStatus, allStatusAsStr) => {
+    const status = allStatusAsStr.split(",").map((s) => s.trim().toUpperCase())
+    return itemStatus && status.includes(itemStatus.toUpperCase())
+}
+
+const isDesfechoLiberado = (desfecho) => {
+    return isStatusPresent(desfecho, process.env.BPA_ALVARA_DESFECHO_STATUS)
+}
+
+const isTipoDeProcessoLicenciamentoSanitario= (tipo) => {
+    return isStatusPresent(tipo, process.env.BPA_ALVARA_TIPO_PROCESSO_STATUS)
+}
+
+const isTipoDeProcessCadastro= (tipo) => {
+    return isStatusPresent(tipo, process.env.CADASTRO_TIPO_DE_PROCESSO_STATUS)
+}
+
+const isTipoDeProcessoAberturaDePAS= (tipo) => {
+    return isStatusPresent(tipo, process.env.PAS_TIPO_DE_PROCESSO_STATUS)
 }
 
 export const relatorioTransmissoes = (tramitassoes) => {
-   const statusAlvaras = getStatusAlvaras()
    const alvaraLiberados = []
    const PASAbertos = []
    let totalAlvaraLiberados = 0
+   let totalPASAbertos = 0
+   let exclusaoCadastroEstabelecimento=0
+   let totalCadastroEstabelecimentoSujeitosAVigilanciaSanitaria=0
    tramitassoes.forEach(t => {
-        if (t.desfecho && statusAlvaras.includes(t.desfecho.toUpperCase())) {
+    if (isTipoDeProcessCadastro(t.tipo)) {
+        totalCadastroEstabelecimentoSujeitosAVigilanciaSanitaria =+ t.quantidade
+    }
+    if (isTipoDeProcessoLicenciamentoSanitario(t.tipo)) {
+        if (isDesfechoLiberado(t.desfecho)) {
             totalAlvaraLiberados += t.quantidade
             alvaraLiberados.push(t)
         }
-        if (t.desfechoExtra && statusAlvaras.includes(t.desfechoExtra.toUpperCase())) {
+        if (isDesfechoLiberado(t.desfechoExtra)) {
             totalAlvaraLiberados += t.quantidadeExtra
         }
+    }
+    if (isTipoDeProcessoAberturaDePAS(t.tipo)) {
+        PASAbertos.push(t)
+        PASAbertos+= t.quantidade
+    }
    });
 
    return {
-    // alvaraLiberados,
-    // PASAbertos,
     totalAlvaraLiberados,
-    totalPASAbertos: PASAbertos.length
+    totalPASAbertos,
+    totalCadastroEstabelecimentoSujeitosAVigilanciaSanitaria,
+    exclusaoCadastroEstabelecimento
    }
 }
 
